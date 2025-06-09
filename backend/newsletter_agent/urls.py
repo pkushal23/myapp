@@ -19,8 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-        path('admin/', admin.site.urls),
-        path('api/auth/', include('accounts.urls')), # Include your auth URLs here
-        # Add other API paths later:
-        # path('api/', include('your_app.urls')),
-    ]
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('accounts.urls')),
+    path('api/', include('curation.urls')), # Include your curation URLs
+]
