@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import MyArticlesPage from './pages/MyArticlesPage';
 import { Container, AppBar, Toolbar, Typography, Button } from '@mui/material';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/my-articles" element={<MyArticlesPage />} />
           <Route path="/" element={<DashboardPage />} /> {/* Default route */}
         </Routes>
       </Container>
@@ -48,6 +50,8 @@ function Header() {
         <Button color="inherit" component={Link} to="/login">Login</Button>
         <Button color="inherit" component={Link} to="/register">Register</Button>
         <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
+        <Button color="inherit" component={Link} to="/my-articles">My Articles</Button>
+
         {isLoggedIn && (
           <Button color="inherit" onClick={handleLogout}>Logout</Button>
         )}

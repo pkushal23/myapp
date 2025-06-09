@@ -14,25 +14,25 @@ function DashboardPage() {
   const userId = localStorage.getItem('user_id'); // If you stored this
 
   useEffect(() => {
-    if (!token) {
-      // Handle unauthenticated user (e.g., redirect to login)
-      return;
-    }
+    // if (!token) {
+    //   // Handle unauthenticated user (e.g., redirect to login)
+    //   return;
+    // }
 
     const fetchInterests = async () => {
       setLoading(true);
       setError('');
       try {
         // Fetch all available interests
-        const allInterestsResponse = await axios.get('http://localhost:8000/api/interests/', {
+        const allInterestsResponse = await axios.get('http://localhost:8000/api/interests/', /*{
           headers: { Authorization: `Token ${token}` }
-        });
+        }*/);
         setAvailableInterests(allInterestsResponse.data);
 
         // Fetch user's current interests
-        const userInterestsResponse = await axios.get('http://localhost:8000/api/user-interests/', {
+        const userInterestsResponse = await axios.get('http://localhost:8000/api/user-interests/', /*{
           headers: { Authorization: `Token ${token}` }
-        });
+        }*/);
         const currentUserInterestIds = new Set(userInterestsResponse.data.map(ui => ui.interest.id));
         setSelectedInterestIds(currentUserInterestIds);
 
@@ -76,7 +76,7 @@ function DashboardPage() {
       const response = await axios.post(
         'http://localhost:8000/api/user-interests/',
         { add_interests: addInterests, remove_interests: removeInterests },
-        { headers: { Authorization: `Token ${token}` } }
+       /* { headers: { Authorization: `Token ${token}` } }*/
       );
       setMessage(response.data.message);
       // Re-sync selected interests from the backend's response if necessary

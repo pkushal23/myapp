@@ -2,9 +2,9 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.db import transaction
-from .models import Interest, UserInterest
+from .models import Interest, UserInterest, Article
 from .serializers import InterestSerializer, UserInterestSerializer, UserInterestsUpdateSerializer
-
+from .serializers import ArticleSerializer
 class InterestListView(generics.ListAPIView):
     queryset = Interest.objects.all()
     serializer_class = InterestSerializer
@@ -51,3 +51,11 @@ class UserInterestView(generics.ListAPIView):
             "message": f"Successfully added {added_count} interests and removed {removed_count} interests.",
             "current_interests": UserInterestSerializer(self.get_queryset(), many=True).data
         }, status=status.HTTP_200_OK)
+# backend/curation/views.py (add to existing) Define this next
+
+class ArticleListView(generics.ListAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    permission_classes = [permissions.AllowAny] # Only admin can see all raw articles
+    # For debugging during development, you might set this to permissions.IsAuthenticated,
+    # but revert for production if not intended for end users.

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import environ
+from datetime import timedelta
 
 env = environ.Env(
     # set casting and default values
@@ -24,7 +25,7 @@ environ.Env.read_env(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+NEWS_API_KEY = env('NEWS_API_KEY')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'curation',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +141,23 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC' # Or your local timezone 'Asia/Kolkata'
+
+# Optional: Celery Beat settings for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'fetch-articles-daily': {
+        'task': 'curation.tasks.fetch_and_save_articles_task', # Will define this task shortly
+        'schedule': timedelta(hours=24), # Run once every 24 hours
+        # 'schedule': timedelta(minutes=10), # For testing, run every 10 minutes
+        'args': () # If your task takes arguments
+    },
+    # Add other scheduled tasks here later, e.g., 'generate-newsletters-daily'
+}
