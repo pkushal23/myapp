@@ -2,20 +2,23 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.db import transaction
-from .models import Interest, UserInterest, Article
-from .serializers import InterestSerializer, UserInterestSerializer, UserInterestsUpdateSerializer
+from .models import Interest, UserInterest, Article, Newsletter
+from .serializers import InterestSerializer, UserInterestSerializer, UserInterestsUpdateSerializer, NewsletterSerializer
 from .serializers import ArticleSerializer
 class InterestListView(generics.ListAPIView):
     queryset = Interest.objects.all()
     serializer_class = InterestSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] # Allow anyone to see available interests
 
-class UserInterestView(generics.ListAPIView):
-    serializer_class = UserInterestSerializer
+from rest_framework.views import APIView  # Use this instead for full flexibility
+
+class UserInterestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        return UserInterest.objects.filter(user=self.request.user)
+    def get(self, request, *args, **kwargs):
+        interests = UserInterest.objects.filter(user=request.user)
+        serializer = UserInterestSerializer(interests, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = UserInterestsUpdateSerializer(data=request.data)
@@ -28,7 +31,6 @@ class UserInterestView(generics.ListAPIView):
         removed_count = 0
 
         with transaction.atomic():
-            # Add interests
             for interest_id in add_interests_ids:
                 try:
                     interest = Interest.objects.get(id=interest_id)
@@ -38,7 +40,6 @@ class UserInterestView(generics.ListAPIView):
                 except Interest.DoesNotExist:
                     return Response({"error": f"Interest with ID {interest_id} not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Remove interests
             for interest_id in remove_interests_ids:
                 try:
                     interest = Interest.objects.get(id=interest_id)
@@ -47,10 +48,12 @@ class UserInterestView(generics.ListAPIView):
                 except Interest.DoesNotExist:
                     return Response({"error": f"Interest with ID {interest_id} not found."}, status=status.HTTP_400_BAD_REQUEST)
 
+        current = UserInterest.objects.filter(user=request.user)
         return Response({
             "message": f"Successfully added {added_count} interests and removed {removed_count} interests.",
-            "current_interests": UserInterestSerializer(self.get_queryset(), many=True).data
+            "current_interests": UserInterestSerializer(current, many=True).data
         }, status=status.HTTP_200_OK)
+
 # backend/curation/views.py (add to existing) Define this next
 
 class ArticleListView(generics.ListAPIView):
@@ -59,3 +62,11 @@ class ArticleListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny] # Only admin can see all raw articles
     # For debugging during development, you might set this to permissions.IsAuthenticated,
     # but revert for production if not intended for end users.
+
+class UserNewsletterListView(generics.ListAPIView):
+    serializer_class = NewsletterSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Only show newsletters for the logged-in user
+        return Newsletter.objects.filter(user=self.request.user).order_by('-generation_date')

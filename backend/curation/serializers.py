@@ -1,6 +1,6 @@
 # backend/curation/serializers.py
 from rest_framework import serializers
-from .models import Interest, UserInterest, Article
+from .models import Interest, UserInterest, Article, Newsletter
 from django.contrib.auth.models import User
 
 class InterestSerializer(serializers.ModelSerializer):
@@ -36,7 +36,13 @@ class UserInterestsUpdateSerializer(serializers.Serializer):
 # backend/curation/serializers.py
 # ...
 class ArticleSerializer(serializers.ModelSerializer):
-    topics = InterestSerializer(many=True, read_only=True) # To display linked interests
     class Meta:
         model = Article
-        fields = '__all__'
+        fields = ['id', 'title', 'url','published_date','summary']
+
+class NewsletterSerializer(serializers.ModelSerializer):
+    articles_included = ArticleSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Newsletter
+        fields = ['id', 'user', 'content', 'generation_date', 'articles_included']

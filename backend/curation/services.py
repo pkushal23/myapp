@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from .models import Article, Interest
 
+
+
 NEWS_API_BASE_URL = "https://newsapi.org/v2/everything"
 
 def fetch_articles_from_newsapi(keywords, from_date=None, to_date=None, language='en', page_size=100):
@@ -66,12 +68,10 @@ def fetch_articles_from_newsapi(keywords, from_date=None, to_date=None, language
 
 
 
-
 def save_articles_to_db(articles_data, interests_map=None):
-    """
-    Saves fetched article data to the database.
-    :return: Count of newly saved articles.
-    """
+    from .models import Article, Interest
+    from datetime import datetime
+
     if interests_map is None:
         interests_map = {interest.name.lower(): interest for interest in Interest.objects.all()}
 
@@ -111,8 +111,13 @@ def save_articles_to_db(articles_data, interests_map=None):
                 if interest_name in article_text
             ]
             article.topics.set(article_topics)
+
+            # ✅ DEFERRED IMPORT to avoid circular import issue
+            from .tasks import summarize_article_task
+            summarize_article_task.delay(article.id)
+
             saved_count += 1
-            print(f"Saved new article: {article.title}")
+            print(f"Saved new article: {article.title} and queued for summarization.")
 
         except Exception as e:
             print(f"Error saving article {url}: {e}")
@@ -120,3 +125,5 @@ def save_articles_to_db(articles_data, interests_map=None):
 
     print(f"Finished saving articles. Total new articles saved: {saved_count}")
     return saved_count
+
+

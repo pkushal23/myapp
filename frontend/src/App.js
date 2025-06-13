@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import MyArticlesPage from './pages/MyArticlesPage';
+import NewsletterPage from './pages/NewsletterPage';
 import { Container, AppBar, Toolbar, Typography, Button } from '@mui/material';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/my-articles" element={<MyArticlesPage />} />
+          <Route path="/newsletter" element={<NewsletterPage />} />
           <Route path="/" element={<DashboardPage />} /> {/* Default route */}
         </Routes>
       </Container>
@@ -51,6 +53,8 @@ function Header() {
         <Button color="inherit" component={Link} to="/register">Register</Button>
         <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
         <Button color="inherit" component={Link} to="/my-articles">My Articles</Button>
+        <Button color="inherit" component={Link} to="/newsletter">Newsletter</Button>
+
 
         {isLoggedIn && (
           <Button color="inherit" onClick={handleLogout}>Logout</Button>
